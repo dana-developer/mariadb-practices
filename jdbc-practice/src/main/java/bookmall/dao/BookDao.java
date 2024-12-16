@@ -11,47 +11,39 @@ import bookmall.vo.BookVo;
 public class BookDao {
 	
 	public void insert(BookVo bookVo) {
-		Connection conn = null;
-		PreparedStatement pstmt = null;
-		PreparedStatement pstmt2 = null;
-		ResultSet rs = null;
+		
+		try(
+				Connection conn = getConnection();
+				PreparedStatement pstmt1 = conn.prepareStatement("insert into book (title, price, category_no) values (?, ?, ?)");
+				PreparedStatement pstmt2 = conn.prepareStatement("select last_insert_id() from dual");
+		) {			
+			pstmt1.setString(1, bookVo.getTitle());
+			pstmt1.setInt(2, bookVo.getPrice());
+			pstmt1.setLong(3, bookVo.getCategoryNo());
 
-		try {
-			conn = getConnection();
-			
-			String sql = "insert into book (title, price, category_no) values (?, ?, ?)";
-			pstmt = conn.prepareStatement(sql);
-			
-			pstmt.setString(1, bookVo.getTitle());
-			pstmt.setInt(2, bookVo.getPrice());
-			pstmt.setLong(3, bookVo.getCategoryNo());
-
-			pstmt.executeUpdate();
+			pstmt1.executeUpdate();
 					
-			String sql2 = "select last_insert_id() from dual ";
-			pstmt2 = conn.prepareStatement(sql2);
-			rs = pstmt2.executeQuery();
+			ResultSet rs = pstmt2.executeQuery();
+			bookVo.setNo(rs.next() ? rs.getLong(1) : null);
+			rs.close();
 			
-			if(rs.next()) {
-				bookVo.setNo(rs.getLong(1));
-			}
 		} catch(SQLException e) {
 			System.out.println("error : " + e);
-		} finally {
-			try {
-				if(rs != null) {
-					rs.close();
-				}
-				if(pstmt != null) {
-					pstmt.close();
-				}
-				if(conn != null) {
-					conn.close();
-				}
-			} catch(SQLException e) {
-				System.out.println("error : " + e);
-			}
 		}
+	}
+
+	public void deleteByNo(Long no) {
+		
+		try (
+				Connection conn = getConnection();
+				PreparedStatement pstmt = conn.prepareStatement("delete from book where no = ?");
+		){
+			pstmt.setLong(1, no);
+			pstmt.executeUpdate();
+						
+		} catch(SQLException e) {
+			System.out.println("error : " + e);
+		}		
 	}
 
 	private Connection getConnection() throws SQLException {
@@ -69,38 +61,4 @@ public class BookDao {
 		
 		return conn;	
 	}
-
-	public void deleteByNo(Long no) {
-		Connection conn = null;
-		PreparedStatement pstmt = null;
-		
-		try {
-			conn = getConnection();
-			
-			String sql = "delete"
-					   + "  from book"
-					   + " where no = ?";
-			pstmt = conn.prepareStatement(sql);
-			
-			pstmt.setLong(1, no);
-
-			pstmt.executeUpdate();
-						
-		} catch(SQLException e) {
-			System.out.println("error : " + e);
-		} finally {
-			try {
-				if(pstmt != null) {
-					pstmt.close();
-				}
-				if(conn != null) {
-					conn.close();
-				}
-			} catch(SQLException e) {
-				System.out.println("error : " + e);
-			}
-		}		
-	}
-
-	
 }

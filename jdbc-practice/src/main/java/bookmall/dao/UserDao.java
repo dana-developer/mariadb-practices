@@ -13,66 +13,34 @@ import bookmall.vo.UserVo;
 public class UserDao {
 
 	public void insert(UserVo userVo) {
-		Connection conn = null;
-		PreparedStatement pstmt = null;
-		PreparedStatement pstmt2 = null;
-		ResultSet rs = null;
-
-		try {
-			conn = getConnection();
+		try (
+				Connection conn = getConnection();
+				PreparedStatement pstmt1 = conn.prepareStatement("insert into user (name, phone_number, email, password) values (?,?,?,?)");
+				PreparedStatement pstmt2 = conn.prepareStatement("select last_insert_id() from dual");
+		){
+			pstmt1.setString(1, userVo.getName());
+			pstmt1.setString(2, userVo.getPhoneNumber());
+			pstmt1.setString(3, userVo.getEmail());
+			pstmt1.setString(4, userVo.getPassword());
+			pstmt1.executeUpdate();
 			
-			String sql = "insert into user (name, phone_number, email, password) values (?,?,?,?)";
-			pstmt = conn.prepareStatement(sql);
-			
-			pstmt.setString(1, userVo.getName());
-			pstmt.setString(2, userVo.getPhoneNumber());
-			pstmt.setString(3, userVo.getEmail());
-			pstmt.setString(4, userVo.getPassword());
-
-			pstmt.executeUpdate();
-			
-			String sql2 = "select last_insert_id() from dual ";
-			pstmt2 = conn.prepareStatement(sql2);
-			rs = pstmt2.executeQuery();
-			
-			if(rs.next()) {
-				userVo.setNo(rs.getLong(1));
-			}
+			ResultSet rs = pstmt2.executeQuery();
+			userVo.setNo(rs.next() ? rs.getLong(1) : null);
+			rs.close();
 						
 		} catch(SQLException e) {
 			System.out.println("error : " + e);
-		} finally {
-			try {
-				if(rs != null) {
-					rs.close();
-				}
-				if(pstmt != null) {
-					pstmt.close();
-				}
-				if(conn != null) {
-					conn.close();
-				}
-			} catch(SQLException e) {
-				System.out.println("error : " + e);
-			}
 		}
 	}
 	
 	public List<UserVo> findAll() {
 		List<UserVo> result = new ArrayList<>();
-		Connection conn = null;
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
 		
-		try {
-			conn = getConnection();
-			
-			String sql = "select no, name, phone_number, email, password" +
-						  " from user" + 
-					  " order by no desc";
-			pstmt = conn.prepareStatement(sql);
-			
-			rs = pstmt.executeQuery();
+		try (
+				Connection conn = getConnection();
+				PreparedStatement pstmt = conn.prepareStatement("select no, name, phone_number, email, password from user order by no desc");
+		){						
+			ResultSet rs = pstmt.executeQuery();
 			
 			while(rs.next()) {
 				String name = rs.getString(2);
@@ -84,25 +52,26 @@ public class UserDao {
 				result.add(vo);
 			}
 			
+			rs.close();
+			
 		} catch(SQLException e) {
 			System.out.println("error : " + e);
-		} finally {
-			try {
-				if(rs != null) {
-					rs.close();
-				}
-				if(pstmt != null) {
-					pstmt.close();
-				}
-				if(conn != null) {
-					conn.close();
-				}
-			} catch(SQLException e) {
-				System.out.println("error : " + e);
-			}
 		}
 		
 		return result;
+	}
+
+	public void deleteByNo(Long no) {
+		try (
+				Connection conn = getConnection();
+				PreparedStatement pstmt = conn.prepareStatement("delete from user where no = ?");
+		){				
+			pstmt.setLong(1, no);
+			pstmt.executeUpdate();
+						
+		} catch(SQLException e) {
+			System.out.println("error : " + e);
+		} 
 	}
 	
 	private Connection getConnection() throws SQLException {
@@ -120,37 +89,4 @@ public class UserDao {
 		
 		return conn;	
 	}
-
-	public void deleteByNo(Long no) {
-		Connection conn = null;
-		PreparedStatement pstmt = null;
-		
-		try {
-			conn = getConnection();
-			
-			String sql = "delete"
-					   + "  from user"
-					   + " where no = ?";
-			pstmt = conn.prepareStatement(sql);
-			
-			pstmt.setLong(1, no);
-
-			pstmt.executeUpdate();
-						
-		} catch(SQLException e) {
-			System.out.println("error : " + e);
-		} finally {
-			try {
-				if(pstmt != null) {
-					pstmt.close();
-				}
-				if(conn != null) {
-					conn.close();
-				}
-			} catch(SQLException e) {
-				System.out.println("error : " + e);
-			}
-		}		
-	}	
-
 }

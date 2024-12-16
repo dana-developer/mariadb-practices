@@ -13,49 +13,76 @@ import bookmall.vo.CartVo;
 public class CartDao {
 
 	public void insert(CartVo cartVo) {
-		Connection conn = null;
-		PreparedStatement pstmt = null;
-		PreparedStatement pstmt2 = null;
-		ResultSet rs = null;
-
-		try {
-			conn = getConnection();
+	
+		try (
+				Connection conn = getConnection();
+				PreparedStatement pstmt1 = conn.prepareStatement("insert into cart (user_no, book_no, quantity) values (?, ?, ?)");
+				PreparedStatement pstmt2 = conn.prepareStatement("select last_insert_id() from dual");
+		){	
+			pstmt1.setLong(1, cartVo.getUserNo());
+			pstmt1.setLong(2, cartVo.getBookNo());
+			pstmt1.setInt(3, cartVo.getQuantity());
 			
-			String sql = "insert into cart (user_no, book_no, quantity) values (?, ?, ?)";
-			pstmt = conn.prepareStatement(sql);
+			pstmt1.executeUpdate();
 			
-			pstmt.setLong(1, cartVo.getUserNo());
-			pstmt.setLong(2, cartVo.getBookNo());
-			pstmt.setInt(3, cartVo.getQuantity());
-
-			pstmt.executeUpdate();
+			ResultSet rs = pstmt2.executeQuery();
+			cartVo.setNo(rs.next() ? rs.getLong(1) : null);
+			rs.close();
 			
-			String sql2 = "select last_insert_id() from dual ";
-			pstmt2 = conn.prepareStatement(sql2);
-			rs = pstmt2.executeQuery();
-			
-			if(rs.next()) {
-				cartVo.setNo(rs.getLong(1));
-			}
 		} catch(SQLException e) {
 			System.out.println("error : " + e);
-		} finally {
-			try {
-				if(rs != null) {
-					rs.close();
-				}
-				if(pstmt != null) {
-					pstmt.close();
-				}
-				if(conn != null) {
-					conn.close();
-				}
-			} catch(SQLException e) {
-				System.out.println("error : " + e);
-			}
 		}
 	}
 
+	public void deleteByUserNoAndBookNo(Long userNo, Long no) {
+		
+		try (
+				Connection conn = getConnection();
+				PreparedStatement pstmt = conn.prepareStatement("delete from cart where user_no = ? and book_no = ?");
+		){
+			pstmt.setLong(1, userNo);
+			pstmt.setLong(2, no);
+			pstmt.executeUpdate();
+						
+		} catch(SQLException e) {
+			System.out.println("error : " + e);
+		}
+	}
+
+	public List<CartVo> findByUserNo(Long userNo) {
+		List<CartVo> result = new ArrayList<>();
+		
+		String sql = "select cart.no, book_no, quantity, book.title" +
+				  " from cart" +
+				  " join book on cart.book_no = book.no" +
+				 " where cart.user_no = ?";
+		
+		try (
+				Connection conn = getConnection();
+				PreparedStatement pstmt = conn.prepareStatement(sql);
+		){			
+			pstmt.setLong(1, userNo);
+			ResultSet rs = pstmt.executeQuery();
+			
+			while(rs.next()) {
+				Long no = rs.getLong(1);
+				Long bookNo = rs.getLong(2);
+				int quantity = rs.getInt(3);
+				String bookTitle = rs.getString(4);
+				
+				CartVo vo = new CartVo(no, userNo, bookNo, quantity, bookTitle);
+				result.add(vo);
+			}
+			
+			rs.close();
+			
+		} catch(SQLException e) {
+			System.out.println("error : " + e);
+		}
+		
+		return result;		
+	}
+	
 	private Connection getConnection() throws SQLException {
 		Connection conn = null;
 
@@ -70,89 +97,5 @@ public class CartDao {
 		}
 		
 		return conn;	
-	}
-
-	public void deleteByUserNoAndBookNo(Long userNo, Long no) {
-		Connection conn = null;
-		PreparedStatement pstmt = null;
-		
-		try {
-			conn = getConnection();
-			
-			String sql = "delete"
-					   + "  from cart"
-					   + " where user_no = ? and book_no = ?";
-			pstmt = conn.prepareStatement(sql);
-			
-			pstmt.setLong(1, userNo);
-			pstmt.setLong(2, no);
-
-			pstmt.executeUpdate();
-						
-		} catch(SQLException e) {
-			System.out.println("error : " + e);
-		} finally {
-			try {
-				if(pstmt != null) {
-					pstmt.close();
-				}
-				if(conn != null) {
-					conn.close();
-				}
-			} catch(SQLException e) {
-				System.out.println("error : " + e);
-			}
-		}
-	}
-
-	public List<CartVo> findByUserNo(Long userNo) {
-		List<CartVo> result = new ArrayList<>();
-		Connection conn = null;
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		
-		try {
-			conn = getConnection();
-			
-			String sql = "select cart.no, book_no, quantity, book.title" +
-						  " from cart" +
-						  " join book on cart.book_no = book.no" +
-						 " where cart.user_no = ?";
-			
-			pstmt = conn.prepareStatement(sql);
-			
-			pstmt.setLong(1, userNo);
-			
-			rs = pstmt.executeQuery();
-			
-			while(rs.next()) {
-				Long no = rs.getLong(1);
-				Long bookNo = rs.getLong(2);
-				int quantity = rs.getInt(3);
-				String bookTitle = rs.getString(4);
-				
-				CartVo vo = new CartVo(no, userNo, bookNo, quantity, bookTitle);
-				result.add(vo);
-			}
-			
-		} catch(SQLException e) {
-			System.out.println("error : " + e);
-		} finally {
-			try {
-				if(rs != null) {
-					rs.close();
-				}
-				if(pstmt != null) {
-					pstmt.close();
-				}
-				if(conn != null) {
-					conn.close();
-				}
-			} catch(SQLException e) {
-				System.out.println("error : " + e);
-			}
-		}
-		
-		return result;		
 	}
 }
