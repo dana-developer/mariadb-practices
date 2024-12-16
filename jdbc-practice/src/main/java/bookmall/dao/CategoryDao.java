@@ -14,9 +14,9 @@ public class CategoryDao {
 
 	public void insert(CategoryVo categoryVo) {
 		try (
-				Connection conn = getConnection();
-				PreparedStatement pstmt = conn.prepareStatement("insert into category (name) values (?)");
-				PreparedStatement pstmt2 = conn.prepareStatement("select last_insert_id() from dual");
+			Connection conn = getConnection();
+			PreparedStatement pstmt = conn.prepareStatement("insert into category (name) values (?)");
+			PreparedStatement pstmt2 = conn.prepareStatement("select last_insert_id() from dual");
 		){
 			pstmt.setString(1, categoryVo.getName());
 			pstmt.executeUpdate();
@@ -32,8 +32,8 @@ public class CategoryDao {
 
 	public void deleteByNo(Long no) {
 		try (
-				Connection conn = getConnection();
-				PreparedStatement pstmt = conn.prepareStatement("delete from category where no = ?");
+			Connection conn = getConnection();
+			PreparedStatement pstmt = conn.prepareStatement("delete from category where no = ?");
 		){			
 			pstmt.setLong(1, no);
 			pstmt.executeUpdate();
@@ -47,8 +47,8 @@ public class CategoryDao {
 		List<CategoryVo> result = new ArrayList<>();
 
 		try (
-				Connection conn = getConnection();
-				PreparedStatement pstmt = conn.prepareStatement("select no, name from category order by no desc");
+			Connection conn = getConnection();
+			PreparedStatement pstmt = conn.prepareStatement("select no, name from category order by no desc");
 		){			
 			ResultSet rs = pstmt.executeQuery();
 			

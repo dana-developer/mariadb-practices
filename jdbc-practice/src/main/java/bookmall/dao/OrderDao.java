@@ -15,9 +15,9 @@ public class OrderDao {
 
 	public void insert(OrderVo orderVo) {
 		try (
-				Connection conn = getConnection();
-				PreparedStatement pstmt1 = conn.prepareStatement("insert into orders (number, status, payment, delivery_address, user_no) values (?,?,?,?,?)");
-				PreparedStatement pstmt2 = conn.prepareStatement("select last_insert_id() from dual");
+			Connection conn = getConnection();
+			PreparedStatement pstmt1 = conn.prepareStatement("insert into orders (number, status, payment, delivery_address, user_no) values (?,?,?,?,?)");
+			PreparedStatement pstmt2 = conn.prepareStatement("select last_insert_id() from dual");
 		){						
 			pstmt1.setString(1, orderVo.getNumber());
 			pstmt1.setString(2, orderVo.getStatus());
@@ -39,8 +39,8 @@ public class OrderDao {
 	
 	public void insertBook(OrderBookVo orderBookVo) {
 		try (
-				Connection conn = getConnection();
-				PreparedStatement pstmt = conn.prepareStatement("insert into orders_book (book_no, orders_no, quantity, price) values (?,?,?,?)");
+			Connection conn = getConnection();
+			PreparedStatement pstmt = conn.prepareStatement("insert into orders_book (book_no, orders_no, quantity, price) values (?,?,?,?)");
 		){			
 			pstmt.setLong(1, orderBookVo.getBookNo());
 			pstmt.setLong(2, orderBookVo.getOrderNo());
@@ -56,8 +56,8 @@ public class OrderDao {
 
 	public void deleteByNo(Long no) {
 		try (
-				Connection conn = getConnection();
-				PreparedStatement pstmt = conn.prepareStatement("delete from orders where no = ?");
+			Connection conn = getConnection();
+			PreparedStatement pstmt = conn.prepareStatement("delete from orders where no = ?");
 		){						
 			pstmt.setLong(1, no);
 			pstmt.executeUpdate();
@@ -69,8 +69,8 @@ public class OrderDao {
 
 	public void deleteBooksByNo(Long no) {
 		try (
-				Connection conn = getConnection();
-				PreparedStatement pstmt = conn.prepareStatement("delete from orders_book where orders_no = ?");
+			Connection conn = getConnection();
+			PreparedStatement pstmt = conn.prepareStatement("delete from orders_book where orders_no = ?");
 		){			
 			pstmt.setLong(1, no);
 			pstmt.executeUpdate();
@@ -84,8 +84,8 @@ public class OrderDao {
 		OrderVo result = null;
 
 		try (
-				Connection conn = getConnection();
-				PreparedStatement pstmt = conn.prepareStatement("select number, status, payment, delivery_address from orders where no = ? and user_no = ?");
+			Connection conn = getConnection();
+			PreparedStatement pstmt = conn.prepareStatement("select number, status, payment, delivery_address from orders where no = ? and user_no = ?");
 		){						
 			pstmt.setLong(1, no);
 			pstmt.setLong(2, userNo);
@@ -121,8 +121,8 @@ public class OrderDao {
 				     " where a.no = ? and a.user_no = ?";
 		
 		try (
-				Connection conn = getConnection();
-				PreparedStatement pstmt = conn.prepareStatement(sql);
+			Connection conn = getConnection();
+			PreparedStatement pstmt = conn.prepareStatement(sql);
 		){
 			pstmt.setLong(1, no);
 			pstmt.setLong(2, userNo);

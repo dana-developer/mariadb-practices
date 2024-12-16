@@ -13,9 +13,9 @@ public class BookDao {
 	public void insert(BookVo bookVo) {
 		
 		try(
-				Connection conn = getConnection();
-				PreparedStatement pstmt1 = conn.prepareStatement("insert into book (title, price, category_no) values (?, ?, ?)");
-				PreparedStatement pstmt2 = conn.prepareStatement("select last_insert_id() from dual");
+			Connection conn = getConnection();
+			PreparedStatement pstmt1 = conn.prepareStatement("insert into book (title, price, category_no) values (?, ?, ?)");
+			PreparedStatement pstmt2 = conn.prepareStatement("select last_insert_id() from dual");
 		) {			
 			pstmt1.setString(1, bookVo.getTitle());
 			pstmt1.setInt(2, bookVo.getPrice());
@@ -35,8 +35,8 @@ public class BookDao {
 	public void deleteByNo(Long no) {
 		
 		try (
-				Connection conn = getConnection();
-				PreparedStatement pstmt = conn.prepareStatement("delete from book where no = ?");
+			Connection conn = getConnection();
+			PreparedStatement pstmt = conn.prepareStatement("delete from book where no = ?");
 		){
 			pstmt.setLong(1, no);
 			pstmt.executeUpdate();

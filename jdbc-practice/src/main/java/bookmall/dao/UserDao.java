@@ -14,9 +14,9 @@ public class UserDao {
 
 	public void insert(UserVo userVo) {
 		try (
-				Connection conn = getConnection();
-				PreparedStatement pstmt1 = conn.prepareStatement("insert into user (name, phone_number, email, password) values (?,?,?,?)");
-				PreparedStatement pstmt2 = conn.prepareStatement("select last_insert_id() from dual");
+			Connection conn = getConnection();
+			PreparedStatement pstmt1 = conn.prepareStatement("insert into user (name, phone_number, email, password) values (?,?,?,?)");
+			PreparedStatement pstmt2 = conn.prepareStatement("select last_insert_id() from dual");
 		){
 			pstmt1.setString(1, userVo.getName());
 			pstmt1.setString(2, userVo.getPhoneNumber());
@@ -37,8 +37,8 @@ public class UserDao {
 		List<UserVo> result = new ArrayList<>();
 		
 		try (
-				Connection conn = getConnection();
-				PreparedStatement pstmt = conn.prepareStatement("select no, name, phone_number, email, password from user order by no desc");
+			Connection conn = getConnection();
+			PreparedStatement pstmt = conn.prepareStatement("select no, name, phone_number, email, password from user order by no desc");
 		){						
 			ResultSet rs = pstmt.executeQuery();
 			
@@ -63,8 +63,8 @@ public class UserDao {
 
 	public void deleteByNo(Long no) {
 		try (
-				Connection conn = getConnection();
-				PreparedStatement pstmt = conn.prepareStatement("delete from user where no = ?");
+			Connection conn = getConnection();
+			PreparedStatement pstmt = conn.prepareStatement("delete from user where no = ?");
 		){				
 			pstmt.setLong(1, no);
 			pstmt.executeUpdate();

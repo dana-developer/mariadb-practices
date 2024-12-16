@@ -15,9 +15,9 @@ public class CartDao {
 	public void insert(CartVo cartVo) {
 	
 		try (
-				Connection conn = getConnection();
-				PreparedStatement pstmt1 = conn.prepareStatement("insert into cart (user_no, book_no, quantity) values (?, ?, ?)");
-				PreparedStatement pstmt2 = conn.prepareStatement("select last_insert_id() from dual");
+			Connection conn = getConnection();
+			PreparedStatement pstmt1 = conn.prepareStatement("insert into cart (user_no, book_no, quantity) values (?, ?, ?)");
+			PreparedStatement pstmt2 = conn.prepareStatement("select last_insert_id() from dual");
 		){	
 			pstmt1.setLong(1, cartVo.getUserNo());
 			pstmt1.setLong(2, cartVo.getBookNo());
@@ -37,8 +37,8 @@ public class CartDao {
 	public void deleteByUserNoAndBookNo(Long userNo, Long no) {
 		
 		try (
-				Connection conn = getConnection();
-				PreparedStatement pstmt = conn.prepareStatement("delete from cart where user_no = ? and book_no = ?");
+			Connection conn = getConnection();
+			PreparedStatement pstmt = conn.prepareStatement("delete from cart where user_no = ? and book_no = ?");
 		){
 			pstmt.setLong(1, userNo);
 			pstmt.setLong(2, no);
@@ -53,13 +53,13 @@ public class CartDao {
 		List<CartVo> result = new ArrayList<>();
 		
 		String sql = "select cart.no, book_no, quantity, book.title" +
-				  " from cart" +
-				  " join book on cart.book_no = book.no" +
-				 " where cart.user_no = ?";
+				      " from cart" +
+				      " join book on cart.book_no = book.no" +
+				     " where cart.user_no = ?";
 		
 		try (
-				Connection conn = getConnection();
-				PreparedStatement pstmt = conn.prepareStatement(sql);
+			Connection conn = getConnection();
+			PreparedStatement pstmt = conn.prepareStatement(sql);
 		){			
 			pstmt.setLong(1, userNo);
 			ResultSet rs = pstmt.executeQuery();
